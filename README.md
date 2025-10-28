@@ -18,7 +18,7 @@ A solução é composta por:
     *   **Hospedagem:** Azure Static Web Apps
 
 *   **Backend:**
-    *   **Linguagem:** Java 17+
+    *   **Linguagem:** Java 21
     *   **Framework:** Spring Boot 3
     *   **Biblioteca de Grafos:** JGraphT
     *   **Hospedagem:** Azure App Service
