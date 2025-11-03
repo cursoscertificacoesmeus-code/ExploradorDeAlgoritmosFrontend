@@ -1,63 +1,66 @@
-<script setup>
-import { ref } from 'vue';
-import ControlPanel from './components/ControlPanel.vue'
-import GraphCanvas from './components/GraphCanvas.vue'
-
-const graphCanvasRef = ref(null);
-
-function handleAddNode() {
-  if (graphCanvasRef.value) {
-    graphCanvasRef.value.addNewNode();
-  }
-}
-</script>
-
 <template>
-  <header>
-    <div class="wrapper">
-      <h1>Graph Explorer</h1>
-    </div>
-  </header>
-
-  <main>
-    <ControlPanel @add-node="handleAddNode" />
-    <GraphCanvas ref="graphCanvasRef" />
-  </main>
+  <div id="app-container">
+    <Menubar :model="menuItems">
+      <template #start>
+        <div class="app-title-wrapper">
+          <i class="pi pi-sitemap app-icon"></i>
+          <span class="app-title">Graph Explorer</span>
+        </div>
+      </template>
+    </Menubar>
+    <main>
+      <router-view />
+    </main>
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import Menubar from 'primevue/menubar';
+
+const router = useRouter();
+
+const menuItems = ref([
+  {
+    label: 'Início',
+    icon: 'pi pi-home',
+    command: () => router.push('/')
+  },
+  {
+    label: 'Editor de Grafo',
+    icon: 'pi pi-pencil',
+    command: () => router.push('/editor')
+  }
+]);
+</script>
+
+<style>
+/* Estilos globais para a aplicação */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  background-color: var(--surface-ground);
+  color: var(--text-color);
+}
+
+.app-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-right: 2rem;
+}
+
+.app-icon {
+  font-size: 1.5rem;
+}
+
+.app-title {
+  font-size: 1.25rem;
+  font-weight: bold;
 }
 
 main {
-  display: grid;
-  grid-template-columns: 1fr 3fr; /* Painel de controle ocupa 1/4 e o Canvas 3/4 */
-  gap: 2rem;
-  height: calc(100vh - 100px); /* Ajusta a altura da área principal */
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+  padding: 1rem;
 }
 </style>

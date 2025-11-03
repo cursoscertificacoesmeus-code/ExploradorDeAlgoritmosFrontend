@@ -10,7 +10,11 @@
   },
   "dependencies": {
     "cytoscape": "^3.28.1",
-    "vue": "^3.3.11"
+    "primevue": "^3.49.1",
+    "primeicons": "^7.0.0",
+    "vue": "^3.3.11",
+    "vue-router": "^4.3.0",
+    "pinia": "^2.1.7"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.5.2",
