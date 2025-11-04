@@ -272,6 +272,21 @@ function generateRandomNodes({ min, max, count }) {
   showEmptyMessage.value = cy.elements().empty();
 }
 
+// Nova função para exportar os dados do grafo
+function getGraphData() {
+  if (!cy) return { nodes: [], edges: [] };
+
+  const nodes = cy.nodes().map(node => ({ id: node.id() }));
+  const edges = cy.edges().map(edge => ({
+    source: edge.source().id(),
+    target: edge.target().id(),
+    weight: edge.data('weight'),
+    directed: edge.data('directed')
+  }));
+
+  return { nodes, edges };
+}
+
 // Expõe as funções para o componente pai
 defineExpose({
   addNewNode,
@@ -279,7 +294,8 @@ defineExpose({
   generateGraphFromData,
   removeNode,
   removeEdge,
-  generateRandomNodes
+  generateRandomNodes,
+  getGraphData
 });
 </script>
 

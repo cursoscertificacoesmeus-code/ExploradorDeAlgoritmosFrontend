@@ -87,6 +87,12 @@
       </div>
     </Panel>
 
+    <Panel header="Algoritmos" toggleable collapsed>
+      <div class="form-group">
+        <Button label="Processar no Backend" @click="processGraph" severity="success" icon="pi pi-cog" />
+      </div>
+    </Panel>
+
   </div>
 </template>
 
@@ -130,7 +136,8 @@ const emit = defineEmits([
   'generate-graph',
   'remove-node',
   'remove-edge',
-  'generate-random-nodes'
+  'generate-random-nodes',
+  'process-graph'
 ]);
 
 function addNode() {
@@ -199,6 +206,10 @@ function generateRandomNodes() {
       count: numberOfRandomNodes.value
     });
   }
+}
+
+function processGraph() {
+  emit('process-graph');
 }
 
 </script>
