@@ -1,25 +1,27 @@
 <template>
   <div class="graph-canvas-wrapper">
     <div ref="cyContainer" class="graph-canvas-container"></div>
-    <div v-if="showEmptyMessage" class="empty-message-overlay">
-      <div class="message-content">
-        <h3>O que são Grafos?</h3>
-        <p>Grafos são estruturas matemáticas usadas para modelar relações entre objetos.</p>
-        <p>Eles consistem em <strong>Nós (vértices)</strong>, que representam os objetos, e <strong>Arestas</strong>, que representam as conexões entre eles.</p>
-        <p>Use o painel ao lado para criar seu primeiro grafo!</p>
+    <transition name="fade" mode="out-in">
+      <div v-if="showEmptyMessage" :key="currentMessageIndex" class="empty-message-overlay">
+        <div class="message-content">
+          <h3>{{ currentMessage.title }}</h3>
+          <p v-for="(paragraph, index) in currentMessage.paragraphs" :key="index" v-html="paragraph"></p>
+        </div>
       </div>
-    </div>
+    </transition>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, onUnmounted, ref, watch, computed } from 'vue';
 import cytoscape from 'cytoscape';
 import { useGraphStore } from '../stores/graphStore';
 
 const cyContainer = ref(null);
 let cy = null;
 const showEmptyMessage = ref(true);
+const currentMessageIndex = ref(0);
+let messageInterval = null;
 
 const graphStore = useGraphStore();
 
@@ -72,6 +74,29 @@ const getDynamicEdgeStyles = () => {
   ];
 };
 
+const messages = [
+  {
+    title: 'O que são Grafos?',
+    paragraphs: [
+      'Grafos são estruturas matemáticas usadas para modelar relações entre objetos.',
+      'Eles consistem em <strong>Nós (vértices)</strong>, que representam os objetos, e <strong>Arestas</strong>, que representam as conexões entre eles.',
+      'Use o painel ao lado para criar seu primeiro grafo!'
+    ]
+  },
+  {
+    title: 'Tipos de Grafos',
+    paragraphs: [
+      'Existem vários tipos de grafos, cada um com suas particularidades:',
+      '<strong>Direcionados (Digrafos):</strong> As arestas têm um sentido, como uma rua de mão única.',
+      '<strong>Não-Direcionados:</strong> As arestas são vias de mão dupla.',
+      '<strong>Ponderados:</strong> Cada aresta tem um "peso" ou "custo" associado.',
+      '<strong>Mistos:</strong> Podem conter tanto arestas direcionadas quanto não-direcionadas.'
+    ]
+  }
+];
+
+const currentMessage = computed(() => messages[currentMessageIndex.value]);
+
 onMounted(() => {
   if (cyContainer.value) {
     cy = cytoscape({
@@ -93,6 +118,34 @@ onMounted(() => {
     cy.on('add remove', 'node, edge', () => {
       showEmptyMessage.value = cy.elements().empty();
     });
+
+    startMessageCarousel();
+  }
+});
+
+onUnmounted(() => {
+  stopMessageCarousel();
+});
+
+function startMessageCarousel() {
+  stopMessageCarousel(); // Garante que não haja múltiplos intervalos
+  messageInterval = setInterval(() => {
+    currentMessageIndex.value = (currentMessageIndex.value + 1) % messages.length;
+  }, 5000); // Muda a cada 5 segundos
+}
+
+function stopMessageCarousel() {
+  if (messageInterval) {
+    clearInterval(messageInterval);
+    messageInterval = null;
+  }
+}
+
+watch(showEmptyMessage, (isVisible) => {
+  if (isVisible) {
+    startMessageCarousel();
+  } else {
+    stopMessageCarousel();
   }
 });
 
@@ -279,5 +332,13 @@ defineExpose({
   font-size: 1rem;
   line-height: 1.5;
   margin-bottom: 0.5rem;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
 }
 </style>
