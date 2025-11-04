@@ -1,7 +1,7 @@
 <template>
   <div class="home-container">
     <Card>
-      <template #title>Bem-vindo ao Visualizador de Grafos</template>
+      <template #title>Bem-vindo ao Explorador de Grafos</template>
       <template #content>
         <p>
           Este é um projeto acadêmico para explorar a criação, visualização e manipulação de grafos.

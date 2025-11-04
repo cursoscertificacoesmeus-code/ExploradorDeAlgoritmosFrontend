@@ -45,10 +45,18 @@ const getDynamicEdgeStyles = () => {
       style: {
         'width': 1,
         'line-color': '#ccc',
-        'target-arrow-color': '#ccc',
-        'target-arrow-shape': graphStore.isDirected ? 'triangle' : 'none',
         'arrow-scale': 0.5,
         'curve-style': 'bezier',
+        'target-arrow-color': '#ccc',
+        'target-arrow-shape': (ele) => {
+          // Se for misto, a direção vem do dado da aresta.
+          // Senão, usa a configuração global.
+          if (graphStore.isMixed) {
+            return ele.data('directed') ? 'triangle' : 'none';
+          } else {
+            return graphStore.isDirected ? 'triangle' : 'none';
+          }
+        },
         'label': graphStore.isWeighted ? 'data(weight)' : '',
         'text-margin-y': graphStore.isWeighted ? -10 : 0,
         'font-size': '8px',
@@ -89,12 +97,18 @@ onMounted(() => {
 });
 
 // Atualiza os estilos das arestas quando isDirected ou isWeighted mudar
-watch(
-  () => graphStore.isDirected,
-  (newIsDirected) => {
-    if (cy) {
-      cy.style().selector('edge').style('target-arrow-shape', newIsDirected ? 'triangle' : 'none').update();
-    }
+watch([() => graphStore.isDirected, () => graphStore.isMixed],
+  () => {
+    if (!cy) return;
+
+    // Redefine o estilo da seta para todas as arestas com base no modo atual
+    cy.edges().style('target-arrow-shape', (ele) => {
+      if (graphStore.isMixed) {
+        return ele.data('directed') ? 'triangle' : 'none';
+      } else {
+        return graphStore.isDirected ? 'triangle' : 'none';
+      }
+    });
   }
 );
 
@@ -135,7 +149,7 @@ function addNewNode(nodeId) {
 }
 
 // Função que adiciona uma nova aresta
-function addNewEdge({ source, target, weight = null }) {
+function addNewEdge({ source, target, weight = null, directed = true }) {
   if (!cy) return;
   if (cy.getElementById(source).empty() || cy.getElementById(target).empty()) {
     alert(`Erro: Nó de origem ou destino não encontrado.`);
@@ -145,11 +159,16 @@ function addNewEdge({ source, target, weight = null }) {
   const edgeData = {
     id: `${source}-${target}-${Math.random()}`,
     source: source,
-    target: target
+    target: target,
   };
 
   if (graphStore.isWeighted && weight !== null) {
     edgeData.weight = weight;
+  }
+
+  // No modo misto, a direção é definida por aresta
+  if (graphStore.isMixed) {
+    edgeData.directed = directed;
   }
 
   cy.add({ group: 'edges', data: edgeData });

@@ -29,6 +29,21 @@
       </div>
     </Panel>
 
+    <Panel header="Configurações do Grafo" toggleable collapsed>
+      <div class="form-group-checkbox">
+        <Checkbox v-model="graphStore.isDirected" inputId="directed-graph" :binary="true" />
+        <label for="directed-graph">Grafo Direcionado</label>
+      </div>
+      <div class="form-group-checkbox">
+        <Checkbox v-model="graphStore.isWeighted" inputId="weighted-graph" :binary="true" />
+        <label for="weighted-graph">Grafo Ponderado</label>
+      </div>
+      <div class="form-group-checkbox">
+        <Checkbox v-model="graphStore.isMixed" inputId="mixed-graph" :binary="true" />
+        <label for="mixed-graph">Grafo Misto</label>
+      </div>
+    </Panel>
+
     <Panel header="Ações Manuais" toggleable collapsed>
        <div class="form-group">
         <label for="new-node-id">ID do Novo Nó</label>
@@ -45,6 +60,10 @@
           <InputText v-model="targetNode" placeholder="Destino" />
           <InputNumber v-if="graphStore.isWeighted" v-model="edgeWeight" placeholder="Peso" :min="0" :max="999" />
           <Button icon="pi pi-plus" @click="addEdge" severity="secondary" />
+        </InputGroup>
+        <InputGroup v-if="graphStore.isMixed" class="edge-direction-control">
+          <Checkbox v-model="isNextEdgeDirected" inputId="next-edge-directed" :binary="true" />
+          <label for="next-edge-directed">Aresta Direcionada</label>
         </InputGroup>
       </div>
     </Panel>
@@ -65,17 +84,6 @@
           <InputText v-model="edgeTargetToRemove" placeholder="Destino" />
           <Button icon="pi pi-times" @click="removeEdge" severity="danger" />
         </InputGroup>
-      </div>
-    </Panel>
-
-    <Panel header="Configurações do Grafo" toggleable collapsed>
-      <div class="form-group-checkbox">
-        <Checkbox v-model="graphStore.isDirected" inputId="directed-graph" :binary="true" />
-        <label for="directed-graph">Grafo Direcionado</label>
-      </div>
-      <div class="form-group-checkbox">
-        <Checkbox v-model="graphStore.isWeighted" inputId="weighted-graph" :binary="true" />
-        <label for="weighted-graph">Grafo Ponderado</label>
       </div>
     </Panel>
 
@@ -105,6 +113,7 @@ const numberOfRandomNodes = ref(3);
 
 const newNodeId = ref('');
 const edgeWeight = ref(null); // Novo ref para o peso da aresta
+const isNextEdgeDirected = ref(true); // Novo ref para controlar a direção da próxima aresta no modo misto
 
 const graphStore = useGraphStore();
 
@@ -112,6 +121,7 @@ const graphStore = useGraphStore();
 onMounted(() => {
   graphStore.isDirected = false;
   graphStore.isWeighted = false;
+  graphStore.isMixed = false;
 });
 
 const emit = defineEmits([
@@ -140,6 +150,9 @@ function addEdge() {
     };
     if (graphStore.isWeighted) {
       edgeData.weight = edgeWeight.value; // Adiciona o peso se for ponderado
+    }
+    if (graphStore.isMixed) {
+      edgeData.directed = isNextEdgeDirected.value; // Adiciona a propriedade de direção
     }
     emit('add-edge', edgeData);
     sourceNode.value = '';
@@ -209,6 +222,11 @@ function generateRandomNodes() {
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
+}
+
+.edge-direction-control {
+  margin-top: 0.5rem;
+  gap: 0.5rem;
 }
 
 .random-node-inputs {
