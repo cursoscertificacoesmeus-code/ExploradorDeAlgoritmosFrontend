@@ -12,34 +12,40 @@ A arquitetura é baseada em microserviços, com um frontend desacoplado do backe
 
 A solução é composta por:
 
-*   **Frontend:**
-    *   **Framework:** Vue.js
-    *   **Visualização:** [A definir: Vis.js, D3.js ou Cytoscape.js]
-    *   **Hospedagem:** Azure Static Web Apps
+- **Frontend:**
 
-*   **Backend:**
-    *   **Linguagem:** Java 21
-    *   **Framework:** Spring Boot 3
-    *   **Biblioteca de Grafos:** JGraphT
-    *   **Hospedagem:** Azure App Service
+  - **Framework:** Vue.js
+  - **Visualização:** Cytoscape.js
+  - **Componentes de UI:** PrimeVue
+  - **Gerenciamento de Estado:** Pinia
+  - **Hospedagem:** Azure Static Web Apps
 
-*   **Cloud Provider:**
-    *   Microsoft Azure
+- **Backend:**
+
+  - **Linguagem:** Java 21
+  - **Framework:** Spring Boot 3
+  - **Biblioteca de Grafos:** JGraphT
+  - **Hospedagem:** Azure App Service
+
+- **Cloud Provider:**
+  - Microsoft Azure
 
 ## ⚙️ Como Executar (Planejado)
 
 1.  **Backend (API):**
-    *   Clonar o repositório.
-    *   Navegar para a pasta do backend.
-    *   Executar `mvn spring-boot:run`.
-    *   A API estará disponível em `http://localhost:8080`.
+
+    - Clonar o repositório.
+    - Navegar para a pasta do backend.
+    - Executar `mvn spring-boot:run`.
+    - A API estará disponível em `http://localhost:8080`.
 
 2.  **Frontend (UI):**
-    *   Navegar para a pasta do frontend.
-    *   Executar `npm install` para instalar as dependências.
-    *   Executar `npm run dev` para iniciar o servidor de desenvolvimento.
-    *   Acessar a aplicação em `http://localhost:5173`.
+    - Navegar para a pasta do frontend.
+    - Executar `npm install` para instalar as dependências.
+    - Executar `npm run dev` para iniciar o servidor de desenvolvimento.
+    - Acessar a aplicação em `http://localhost:5173`.
 
 ## 👥 Autor
 
-*   Rodrigo Marcos
+- Rodrigo Marcos
+- Marcos Pestana
