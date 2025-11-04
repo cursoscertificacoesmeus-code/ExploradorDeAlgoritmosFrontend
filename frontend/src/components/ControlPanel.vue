@@ -70,11 +70,11 @@
 
     <Panel header="Configurações do Grafo" toggleable collapsed>
       <div class="form-group-checkbox">
-        <TriStateCheckbox v-model="graphStore.isDirected" inputId="directed-graph" />
+        <Checkbox v-model="graphStore.isDirected" inputId="directed-graph" :binary="true" />
         <label for="directed-graph">Grafo Direcionado</label>
       </div>
       <div class="form-group-checkbox">
-        <TriStateCheckbox v-model="graphStore.isWeighted" inputId="weighted-graph" />
+        <Checkbox v-model="graphStore.isWeighted" inputId="weighted-graph" :binary="true" />
         <label for="weighted-graph">Grafo Ponderado</label>
       </div>
     </Panel>
@@ -83,13 +83,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Panel from 'primevue/panel';
 import InputGroup from 'primevue/inputgroup';
 import InputNumber from 'primevue/inputnumber';
-import TriStateCheckbox from 'primevue/tristatecheckbox';
+import Checkbox from 'primevue/checkbox';
 import { useGraphStore } from '../stores/graphStore';
 
 const sourceNode = ref('');
@@ -107,6 +107,12 @@ const newNodeId = ref('');
 const edgeWeight = ref(null); // Novo ref para o peso da aresta
 
 const graphStore = useGraphStore();
+
+// Garante que os checkboxes comecem desmarcados
+onMounted(() => {
+  graphStore.isDirected = false;
+  graphStore.isWeighted = false;
+});
 
 const emit = defineEmits([
   'add-node',

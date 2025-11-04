@@ -15,16 +15,30 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue';
 import cytoscape from 'cytoscape';
-import { useGraphStore } from '../stores/graphStore'; // Importa o store
+import { useGraphStore } from '../stores/graphStore';
 
 const cyContainer = ref(null);
-let cy = null; // Variável para guardar a instância do Cytoscape
-const showEmptyMessage = ref(true); // Controla a visibilidade da mensagem
+let cy = null;
+const showEmptyMessage = ref(true);
 
-const graphStore = useGraphStore(); // Usa o store
+const graphStore = useGraphStore();
 
-// Função para obter os estilos das arestas dinamicamente
-const getEdgeStyle = () => {
+// Estilo estático para os nós
+const nodeStyle = {
+  selector: 'node',
+  style: {
+    'background-color': 'hsla(160, 100%, 37%, 1)',
+    'label': 'data(id)',
+    'color': '#333',
+    'text-outline-width': 0,
+    'width': '20px',
+    'height': '20px',
+    'font-size': '8px'
+  }
+};
+
+// Função para obter os estilos dinâmicos das arestas
+const getDynamicEdgeStyles = () => {
   return [
     {
       selector: 'edge',
@@ -32,11 +46,11 @@ const getEdgeStyle = () => {
         'width': 1,
         'line-color': '#ccc',
         'target-arrow-color': '#ccc',
-        'target-arrow-shape': graphStore.isDirected ? 'triangle' : 'none', // Define a seta dinamicamente
+        'target-arrow-shape': graphStore.isDirected ? 'triangle' : 'none',
         'arrow-scale': 0.5,
         'curve-style': 'bezier',
-        'label': graphStore.isWeighted ? 'data(weight)' : '', // Mostra o peso como label se ponderado
-        'text-margin-y': graphStore.isWeighted ? -10 : 0, // Ajusta a posição do label
+        'label': graphStore.isWeighted ? 'data(weight)' : '',
+        'text-margin-y': graphStore.isWeighted ? -10 : 0,
         'font-size': '8px',
         'color': '#333',
         'text-background-opacity': 1,
@@ -54,21 +68,10 @@ onMounted(() => {
   if (cyContainer.value) {
     cy = cytoscape({
       container: cyContainer.value,
-      elements: [], // Começa com um grafo vazio
+      elements: [],
       style: [
-        {
-          selector: 'node',
-          style: {
-            'background-color': 'hsla(160, 100%, 37%, 1)',
-            'label': 'data(id)',
-            'color': '#333',
-            'text-outline-width': 0,
-            'width': '20px',
-            'height': '20px',
-            'font-size': '8px'
-          }
-        },
-        ...getEdgeStyle() // Adiciona os estilos das arestas
+        nodeStyle, // Estilo estático dos nós
+        ...getDynamicEdgeStyles() // Estilo dinâmico inicial das arestas
       ],
       layout: {
         name: 'cose',
@@ -79,23 +82,29 @@ onMounted(() => {
       }
     });
 
-    // Monitora mudanças no grafo para exibir/ocultar a mensagem
     cy.on('add remove', 'node, edge', () => {
       showEmptyMessage.value = cy.elements().empty();
     });
   }
 });
 
-// Roda o layout e atualiza os estilos quando isDirected ou isWeighted mudar
+// Atualiza os estilos das arestas quando isDirected ou isWeighted mudar
 watch(
-  () => [graphStore.isDirected, graphStore.isWeighted],
-  () => {
+  () => graphStore.isDirected,
+  (newIsDirected) => {
     if (cy) {
-      cy.style().fromJson(getEdgeStyle()).update();
-      cy.layout({ name: 'cose', fit: true, padding: 50 }).run();
+      cy.style().selector('edge').style('target-arrow-shape', newIsDirected ? 'triangle' : 'none').update();
     }
-  },
-  { deep: true } // Observa mudanças profundas nas propriedades do store
+  }
+);
+
+watch(
+  () => graphStore.isWeighted,
+  (newIsWeighted) => {
+    if (cy) {
+      cy.style().selector('edge').style('label', newIsWeighted ? 'data(weight)' : '').style('text-margin-y', newIsWeighted ? -10 : 0).update();
+    }
+  }
 );
 
 // Função que gera um grafo a partir de uma lista de nós
@@ -105,14 +114,13 @@ function generateGraphFromData(nodes) {
   const newElements = nodes.map(nodeId => ({ group: 'nodes', data: { id: nodeId } }));
   cy.add(newElements);
   cy.layout({ name: 'cose', fit: true, padding: 50 }).run();
-  showEmptyMessage.value = cy.elements().empty(); // Atualiza a visibilidade da mensagem
+  showEmptyMessage.value = cy.elements().empty();
 }
 
 // Função que adiciona um novo nó manualmente
 function addNewNode(nodeId) {
   if (!cy) return;
 
-  // Valida se o nó já existe
   if (!cy.getElementById(nodeId).empty()) {
     alert(`Erro: Nó com ID '${nodeId}' já existe.`);
     return;
@@ -123,7 +131,7 @@ function addNewNode(nodeId) {
     data: { id: nodeId }
   });
   cy.layout({ name: 'cose', fit: false }).run();
-  showEmptyMessage.value = cy.elements().empty(); // Atualiza a visibilidade da mensagem
+  showEmptyMessage.value = cy.elements().empty();
 }
 
 // Função que adiciona uma nova aresta
@@ -145,7 +153,7 @@ function addNewEdge({ source, target, weight = null }) {
   }
 
   cy.add({ group: 'edges', data: edgeData });
-  showEmptyMessage.value = cy.elements().empty(); // Atualiza a visibilidade da mensagem
+  showEmptyMessage.value = cy.elements().empty();
 }
 
 // Função para remover um nó específico
@@ -174,12 +182,12 @@ function removeEdge({ source, target }) {
 function generateRandomNodes({ min, max, count }) {
   if (!cy) return;
 
-  cy.elements().remove(); // Limpa o grafo existente
+  cy.elements().remove();
 
   const generatedNodes = new Set();
   while (generatedNodes.size < count) {
     const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-    generatedNodes.add(randomNumber.toString()); // Garante que o ID seja string
+    generatedNodes.add(randomNumber.toString());
   }
 
   const newElements = Array.from(generatedNodes).map(nodeId => ({
@@ -227,7 +235,7 @@ defineExpose({
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(255, 255, 255, 0.8); /* Fundo semi-transparente */
+  background-color: rgba(255, 255, 255, 0.8);
   z-index: 10;
   border-radius: 6px;
 }
