@@ -58,7 +58,9 @@ async function handleProcessGraph() {
   };
 
   try {
-    const response = await axios.post('http://localhost:8080/api/graph/process', graphData);
+    // Usa uma variável de ambiente para a URL da API, com um fallback para o ambiente local.
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+    const response = await axios.post(`${apiUrl}/api/graph/process`, graphData);
     console.log('Resposta do Backend:', response.data);
     alert('Grafo processado com sucesso pelo backend! Verifique o console do backend.');
   } catch (error) {

@@ -47,5 +47,4 @@ A solução é composta por:
 
 ## 👥 Autor
 
-- Rodrigo Marcos
-- Marcos Pestana
+- Rodrigo Marcos Nogueira Pestana
