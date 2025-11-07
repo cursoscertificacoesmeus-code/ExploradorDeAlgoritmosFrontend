@@ -3,8 +3,8 @@
     <Menubar :model="menuItems">
       <template #start>
         <div class="app-title-wrapper">
-          <i class="pi pi-sitemap app-icon"></i>
-          <span class="app-title">Graph Explorer</span>
+          <i class="pi pi-project-diagram app-icon"></i>
+          <span class="app-title">Explorador de Algoritmos</span>
         </div>
       </template>
     </Menubar>
@@ -31,6 +31,11 @@ const menuItems = ref([
     label: 'Editor de Grafo',
     icon: 'pi pi-pencil',
     command: () => router.push('/editor')
+  },
+  {
+    label: 'Análise de Ordenação',
+    icon: 'pi pi-sort-amount-up-alt',
+    command: () => router.push('/ordenacao')
   }
 ]);
 </script>

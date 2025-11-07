@@ -1,15 +1,23 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import Home from '../views/Home.vue';
 
 const routes = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('../views/Home.vue')
+    component: Home
   },
   {
     path: '/editor',
     name: 'GraphEditor',
+    // Lazy-load o componente para melhor performance
     component: () => import('../views/GraphEditor.vue')
+  },
+  {
+    path: '/ordenacao',
+    name: 'SortingAnalysis',
+    // Lazy-load o componente para melhor performance
+    component: () => import('../views/AnaliseOrdenacao.vue')
   }
 ];
 
