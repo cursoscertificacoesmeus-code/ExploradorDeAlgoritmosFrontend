@@ -1,37 +1,45 @@
-# Logs
-logs
+# Arquivos de log
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+logs/
 
-# Node dependencies
-node_modules
+# Artefatos de build do Maven/Java
+target/
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
 
-# Build output
-dist
-dist-ssr
+# Arquivos de configuração de ambiente do backend
+# NUNCA comite arquivos com senhas ou segredos!
+/backend/graph-explorer-api/src/main/resources/application.properties
+/backend/graph-explorer-api/src/main/resources/application-*.properties
 
-# Environment variables
-.env.local
-.env.*.local
-
-# IDE and editor directories
-.vscode
-.idea
-
-# Test output
-coverage
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-### VS Code ###
+# Arquivos do VSCode
 .vscode/
 
-# IntelliJ
+# Arquivos do IntelliJ IDEA
 .idea/
+*.iws
+*.iml
+*.ipr
 
+# Arquivos do NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+# Dependências do Node.js
+node_modules/
+
+# Artefatos de build do frontend
+dist/
+
+# Arquivos de ambiente do frontend
+.env*
+!/.env.example
