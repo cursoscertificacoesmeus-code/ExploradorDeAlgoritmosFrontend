@@ -1,10 +1,13 @@
-# Visualizador de Grafos (Graph Explorer)
+# Explorador de Algoritmos (Algorithm Explorer)
 
-Projeto acadêmico desenvolvido para as disciplinas de **Algoritmos em Grafos** e **Computação em Nuvem**. A aplicação consiste em uma plataforma web para criação, visualização e execução de algoritmos clássicos em grafos.
+Projeto acadêmico desenvolvido para as disciplinas de **Análise de Algoritmos**, **Algoritmos em Grafos** e **Computação em Nuvem**. A aplicação consiste em uma plataforma web para criação, visualização e análise de algoritmos clássicos, incluindo algoritmos de ordenação e operações em grafos.
 
 ## 📖 Descrição
 
-O Graph Explorer permite que o usuário desenhe grafos de forma interativa na tela, adicionando nós e arestas. Uma vez que o grafo é criado, o usuário pode selecionar um algoritmo (como Busca em Largura, Dijkstra, etc.), executá-lo e visualizar o resultado passo a passo diretamente na interface gráfica.
+O Algorithm Explorer é uma ferramenta interativa que permite ao usuário:
+
+- **Explorar Algoritmos de Ordenação:** Inserir um conjunto de dados e visualizar o funcionamento de algoritmos de ordenação avançados (como Merge Sort, Quick Sort, etc.), analisando seu desempenho.
+- **Manipular Grafos:** Desenhar grafos de forma interativa, adicionando nós e arestas. Uma vez que o grafo é criado, o usuário pode selecionar um algoritmo (como Busca em Largura, Dijkstra, etc.), executá-lo e visualizar o resultado passo a passo diretamente na interface gráfica.
 
 A arquitetura é baseada em microserviços, com um frontend desacoplado do backend, e toda a infraestrutura é hospedada na nuvem da Microsoft Azure.
 
