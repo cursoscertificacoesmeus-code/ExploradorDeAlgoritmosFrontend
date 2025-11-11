@@ -25,7 +25,7 @@ const menuItems = ref([
   {
     label: 'Início',
     icon: 'pi pi-home',
-    command: () => router.push('/')
+    command: () => router.push('/home')
   },
   {
     label: 'Editor de Grafo',

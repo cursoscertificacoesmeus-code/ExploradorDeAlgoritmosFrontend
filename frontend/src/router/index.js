@@ -1,11 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Home from '../views/Home.vue';
 
 const routes = [
   {
     path: '/',
+    name: 'Login',
+    // Lazy-load o componente para melhor performance
+    component: () => import('../views/Login.vue')
+  },
+  {
+    path: '/home',
     name: 'Home',
-    component: Home
+    // Lazy-load o componente para melhor performance
+    component: () => import('../views/Home.vue')
   },
   {
     path: '/editor',
@@ -18,6 +24,12 @@ const routes = [
     name: 'SortingAnalysis',
     // Lazy-load o componente para melhor performance
     component: () => import('../views/AnaliseOrdenacao.vue')
+  },
+  {
+    path: '/cadastro',
+    name: 'Cadastro',
+    // Lazy-load o componente para melhor performance
+    component: () => import('../views/Cadastro.vue')
   }
 ];
 
