@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
+import { useToast } from 'primevue/usetoast';
 
 const api = axios.create({
   // A URL base da sua API backend, usando variáveis de ambiente com fallback.
@@ -25,7 +26,13 @@ api.interceptors.response.use(
       // Apenas se o usuário estava previamente autenticado no frontend
       if (authStore.isAuthenticated) {
         authStore.logout();
-        alert('Sua sessão expirou. Por favor, faça login novamente.');
+        // Nota: O Toast pode não ser ideal aqui se a navegação for muito rápida.
+        // Uma alternativa é passar uma mensagem via query param para a página de login.
+        // Mas para começar, vamos tentar com um alert ou um log.
+        // O ideal é que o ToastService seja injetado de forma diferente para uso fora de componentes.
+        // Por simplicidade, manteremos o alert aqui, pois a injeção do Toast fora de um setup() é complexa.
+        // Em um projeto real, usaríamos uma solução de notificação global mais robusta.
+         alert('Sua sessão expirou. Por favor, faça login novamente.');
       }
     }
     return Promise.reject(error);

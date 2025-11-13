@@ -40,24 +40,38 @@ import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import Button from 'primevue/button';
 import { register as registerUser } from '../services/authService';
+import { useToast } from 'primevue/usetoast';
 
 const router = useRouter();
+const toast = useToast();
 const username = ref('');
 const email = ref('');
 const password = ref('');
 
 const register = async () => {
   if (!username.value || !email.value || !password.value) {
-    alert('Por favor, preencha todos os campos.');
+    toast.add({ 
+      severity: 'warn', 
+      summary: 'Atenção', 
+      detail: 'Por favor, preencha todos os campos.', 
+      life: 3000 
+    });
     return;
   }
   try {
     await registerUser({ username: username.value, email: email.value, password: password.value });
-    alert('Cadastro realizado com sucesso! Você será redirecionado para a página de login.');
+    toast.add({ 
+      severity: 'success', 
+      summary: 'Sucesso', 
+      detail: 'Cadastro realizado com sucesso! Redirecionando para o login.', 
+      life: 3000 });
     router.push('/'); // Redireciona para o login após o sucesso
   } catch (error: any) {
-    // Idealmente, usar um componente de Toast/Notification aqui
-    alert(`Erro no cadastro: ${error.response?.data?.message || 'Verifique os dados e tente novamente.'}`);
+    toast.add({ 
+      severity: 'error', 
+      summary: 'Erro no Cadastro', 
+      detail: error.response?.data?.message || 'Verifique os dados e tente novamente.', 
+      life: 5000 });
   }
 };
 </script>

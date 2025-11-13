@@ -4,6 +4,7 @@ import Cadastro from '../views/Cadastro.vue';
 import Home from '../views/Home.vue';
 import GraphEditor from '../views/GraphEditor.vue';
 import UserManagement from '../views/UserManagement.vue';
+import MainLayout from '../layouts/MainLayout.vue';
 import { useAuthStore } from '../stores/authStore';
 
 const routes = [
@@ -18,28 +19,35 @@ const routes = [
     component: Cadastro,
   },
   {
-    path: '/home',
-    name: 'Home',
-    component: Home, // Rota protegida por autenticação
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/editor',
-    name: 'GraphEditor',
-    component: GraphEditor, // Rota protegida por autenticação
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/ordenacao',
-    name: 'SortingAnalysis',
-    component: () => import('../views/Home.vue'), // Placeholder, também protegido
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/admin/users',
-    name: 'UserManagement',
-    component: UserManagement,
-    meta: { requiresAuth: true, requiresAdmin: true } // Rota protegida para ADMIN
+    // Rotas que usam o MainLayout
+    path: '/',
+    component: MainLayout,
+    children: [
+      {
+        path: 'home',
+        name: 'Home',
+        component: Home,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'editor',
+        name: 'GraphEditor',
+        component: GraphEditor,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'ordenacao',
+        name: 'SortingAnalysis',
+        component: () => import('../views/Home.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'admin/users',
+        name: 'UserManagement',
+        component: UserManagement,
+        meta: { requiresAuth: true, requiresAdmin: true }
+      }
+    ]
   }
 ];
 
