@@ -84,6 +84,12 @@ function handleGenerateRandomNodes(data: RandomNodeData) {
   }
 }
 
+function handleClearCanvas() {
+  if (graphCanvasRef.value) {
+    graphCanvasRef.value.clearCanvas();
+  }
+}
+
 async function handleProcessGraph() {
   if (!graphCanvasRef.value) return; // A verificação de nulo continua sendo uma boa prática
 
@@ -146,6 +152,7 @@ async function handleProcessGraph() {
       @remove-edge="handleRemoveEdge"
       @generate-random-nodes="handleGenerateRandomNodes"
       @process-graph="handleProcessGraph"
+      @clear-canvas="handleClearCanvas"
     />
     <GraphCanvas ref="graphCanvasRef" />
 

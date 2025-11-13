@@ -85,6 +85,10 @@
           <Button icon="pi pi-times" @click="removeEdge" severity="danger" />
         </InputGroup>
       </div>
+      <div class="form-group">
+        <label>Ações Gerais</label>
+        <Button label="Limpar Canvas" icon="pi pi-refresh" @click="clearCanvas" severity="warning" />
+      </div>
     </Panel>
 
     <Panel header="Algoritmos" toggleable collapsed>
@@ -151,6 +155,7 @@ const emit = defineEmits<{
   (e: 'remove-edge', data: { source: string; target: string }): void;
   (e: 'generate-random-nodes', data: RandomNodeData): void;
   (e: 'process-graph'): void;
+  (e: 'clear-canvas'): void;
 }>();
 
 function addNode() {
@@ -223,6 +228,10 @@ function generateRandomNodes() {
 
 function processGraph() {
   emit('process-graph');
+}
+
+function clearCanvas() {
+  emit('clear-canvas');
 }
 
 </script>

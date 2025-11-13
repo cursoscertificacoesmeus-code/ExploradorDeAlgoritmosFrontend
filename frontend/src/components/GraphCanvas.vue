@@ -310,6 +310,12 @@ function getGraphData(): GraphData {
   return { nodes, edges };
 }
 
+// Função para limpar todos os nós e arestas do canvas
+function clearCanvas() {
+  if (!cy) return;
+  cy.elements().remove();
+}
+
 // Expõe as funções para o componente pai
 defineExpose({
   addNewNode,
@@ -318,7 +324,8 @@ defineExpose({
   removeNode,
   removeEdge,
   generateRandomNodes,
-  getGraphData
+  getGraphData,
+  clearCanvas
 });
 </script>
 
