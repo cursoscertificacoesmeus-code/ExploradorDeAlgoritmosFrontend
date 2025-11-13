@@ -1,0 +1,45 @@
+# Arquivos de log
+*.log
+logs/
+
+# Artefatos de build do Maven/Java
+target/
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# Arquivos de configuração de ambiente do backend
+# NUNCA comite arquivos com senhas ou segredos!
+/backend/graph-explorer-api/src/main/resources/application.properties
+/backend/graph-explorer-api/src/main/resources/application-*.properties
+
+# Arquivos do VSCode
+.vscode/
+
+# Arquivos do IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Arquivos do NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+# Dependências do Node.js
+node_modules/
+
+# Artefatos de build do frontend
+dist/
+
+# Arquivos de ambiente do frontend
+.env*
+!/.env.example

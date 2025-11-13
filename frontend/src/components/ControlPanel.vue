@@ -96,7 +96,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
@@ -106,20 +106,33 @@ import InputNumber from 'primevue/inputnumber';
 import Checkbox from 'primevue/checkbox';
 import { useGraphStore } from '../stores/graphStore';
 
-const sourceNode = ref('');
-const targetNode = ref('');
-const nodeListData = ref('');
-const nodeToRemove = ref('');
-const edgeSourceToRemove = ref('');
-const edgeTargetToRemove = ref('');
+interface EdgeData {
+  source: string;
+  target: string;
+  weight?: number | null;
+  directed?: boolean;
+}
 
-const minRandomValue = ref(1);
-const maxRandomValue = ref(5);
-const numberOfRandomNodes = ref(3);
+interface RandomNodeData {
+  min: number;
+  max: number;
+  count: number;
+}
 
-const newNodeId = ref('');
-const edgeWeight = ref(null); // Novo ref para o peso da aresta
-const isNextEdgeDirected = ref(true); // Novo ref para controlar a direção da próxima aresta no modo misto
+const sourceNode = ref<string>('');
+const targetNode = ref<string>('');
+const nodeListData = ref<string>('');
+const nodeToRemove = ref<string>('');
+const edgeSourceToRemove = ref<string>('');
+const edgeTargetToRemove = ref<string>('');
+
+const minRandomValue = ref<number>(1);
+const maxRandomValue = ref<number>(5);
+const numberOfRandomNodes = ref<number>(3);
+
+const newNodeId = ref<string>('');
+const edgeWeight = ref<number | null>(null);
+const isNextEdgeDirected = ref<boolean>(true);
 
 const graphStore = useGraphStore();
 
@@ -130,15 +143,15 @@ onMounted(() => {
   graphStore.isMixed = false;
 });
 
-const emit = defineEmits([
-  'add-node',
-  'add-edge',
-  'generate-graph',
-  'remove-node',
-  'remove-edge',
-  'generate-random-nodes',
-  'process-graph'
-]);
+const emit = defineEmits<{
+  (e: 'add-node', nodeId: string): void;
+  (e: 'add-edge', edgeData: EdgeData): void;
+  (e: 'generate-graph', nodes: string[]): void;
+  (e: 'remove-node', nodeId: string): void;
+  (e: 'remove-edge', data: { source: string; target: string }): void;
+  (e: 'generate-random-nodes', data: RandomNodeData): void;
+  (e: 'process-graph'): void;
+}>();
 
 function addNode() {
   if (newNodeId.value) {
@@ -151,7 +164,7 @@ function addNode() {
 
 function addEdge() {
   if (sourceNode.value && targetNode.value) {
-    const edgeData = {
+    const edgeData: EdgeData = {
       source: sourceNode.value,
       target: targetNode.value,
     };
@@ -191,16 +204,16 @@ function removeEdge() {
 }
 
 function generateRandomNodes() {
-  if (minRandomValue.value !== null && maxRandomValue.value !== null && numberOfRandomNodes.value !== null) {
-    if (minRandomValue.value > maxRandomValue.value) {
+  if (minRandomValue.value != null && maxRandomValue.value != null && numberOfRandomNodes.value != null) {
+    if (minRandomValue.value > maxRandomValue.value!) {
       alert("O valor mínimo não pode ser maior que o valor máximo.");
       return;
     }
-    if (numberOfRandomNodes.value <= 0) {
+    if (numberOfRandomNodes.value! <= 0) {
       alert("A quantidade de nós deve ser maior que zero.");
       return;
     }
-    emit('generate-random-nodes', {
+    emit('generate-random-nodes', { // O compilador TS garante que os valores não são nulos aqui
       min: minRandomValue.value,
       max: maxRandomValue.value,
       count: numberOfRandomNodes.value

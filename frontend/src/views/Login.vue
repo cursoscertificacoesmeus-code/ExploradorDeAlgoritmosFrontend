@@ -9,8 +9,8 @@
         <p>Acesse sua conta para continuar.</p>
         <div class="p-fluid">
           <div class="p-field">
-            <label for="email">Email</label>
-            <InputText id="email" v-model="email" type="email" />
+            <label for="username">Nome de Usuário</label>
+            <InputText id="username" v-model="username" type="text" />
           </div>
           <div class="p-field">
             <label for="password">Senha</label>
@@ -28,22 +28,29 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import Button from 'primevue/button';
+import { useAuthStore } from '../stores/authStore';
 
-const router = useRouter();
-const email = ref('');
+const authStore = useAuthStore();
+const username = ref('');
 const password = ref('');
 
-const login = () => {
-  // TODO: Implementar a lógica de validação de login
-  console.log('Tentativa de login com:', { email: email.value });
-  router.push('/home');
+const login = async () => {
+  if (!username.value || !password.value) {
+    alert('Por favor, preencha o nome de usuário e a senha.');
+    return;
+  }
+  try {
+    await authStore.login({ username: username.value, password: password.value });
+  } catch (error: any) {
+    // Idealmente, usar um componente de Toast/Notification aqui
+    alert('Falha no login: Verifique seu nome de usuário e senha.');
+  }
 };
 </script>
 

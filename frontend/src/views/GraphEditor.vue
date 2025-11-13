@@ -1,44 +1,70 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import ControlPanel from '../components/ControlPanel.vue'
 import GraphCanvas from '../components/GraphCanvas.vue'
 import { useGraphStore } from '../stores/graphStore';
-import axios from 'axios';
+import api from '../services/api'; // 1. Substituir axios pela nossa instância 'api'
 
-const graphCanvasRef = ref(null);
-const graphStore = useGraphStore();
+// 1. Definir uma interface para os métodos expostos por GraphCanvas
+interface GraphCanvasInstance {
+  addNewNode: (nodeId: string) => void;
+  addNewEdge: (edgeData: EdgeData) => void;
+  generateGraphFromData: (nodes: string[]) => void;
+  removeNode: (nodeId: string) => void;
+  removeEdge: (edgeData: { source: string; target: string }) => void;
+  generateRandomNodes: (data: RandomNodeData) => void;
+  getGraphData: () => { nodes: { id: string }[]; edges: EdgeData[] };
+}
 
-function handleAddNode(nodeId) {
+// 2. Tipar a ref com a interface que criamos
+const graphCanvasRef = ref<GraphCanvasInstance | null>(null);
+
+const graphStore = useGraphStore(); // A store já é tipada
+
+interface EdgeData {
+  source: string;
+  target: string;
+  weight?: number | null;
+  directed?: boolean;
+}
+
+interface RandomNodeData {
+  min: number;
+  max: number;
+  count: number;
+}
+
+function handleAddNode(nodeId: string) {
   if (graphCanvasRef.value) {
     graphCanvasRef.value.addNewNode(nodeId);
   }
 }
 
-function handleAddEdge(edgeData) {
+function handleAddEdge(edgeData: EdgeData) {
   if (graphCanvasRef.value) {
     graphCanvasRef.value.addNewEdge(edgeData);
   }
 }
 
-function handleGenerateGraph(nodes) {
+function handleGenerateGraph(nodes: string[]) {
   if (graphCanvasRef.value) {
     graphCanvasRef.value.generateGraphFromData(nodes);
   }
 }
 
-function handleRemoveNode(nodeId) {
+function handleRemoveNode(nodeId: string) {
   if (graphCanvasRef.value) {
     graphCanvasRef.value.removeNode(nodeId);
   }
 }
 
-function handleRemoveEdge(edgeData) {
+function handleRemoveEdge(edgeData: { source: string; target: string }) {
   if (graphCanvasRef.value) {
     graphCanvasRef.value.removeEdge(edgeData);
   }
 }
 
-function handleGenerateRandomNodes(data) {
+function handleGenerateRandomNodes(data: RandomNodeData) {
   if (graphCanvasRef.value) {
     graphCanvasRef.value.generateRandomNodes(data);
   }
@@ -50,6 +76,7 @@ async function handleProcessGraph() {
   const { nodes, edges } = graphCanvasRef.value.getGraphData();
 
   const graphData = {
+    // Os tipos aqui são inferidos a partir do retorno de getGraphData()
     nodes,
     edges,
     directed: graphStore.isDirected,
@@ -58,9 +85,8 @@ async function handleProcessGraph() {
   };
 
   try {
-    // Usa uma variável de ambiente para a URL da API, com um fallback para o ambiente local.
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
-    const response = await axios.post(`${apiUrl}/api/graph/process`, graphData);
+    // 2. Usar a instância 'api'. A baseURL já está configurada nela.
+    const response = await api.post('/graph/process', graphData);
     console.log('Resposta do Backend:', response.data);
     alert('Grafo processado com sucesso pelo backend! Verifique o console do backend.');
   } catch (error) {
