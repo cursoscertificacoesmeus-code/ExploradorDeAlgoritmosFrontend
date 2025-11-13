@@ -35,9 +35,10 @@ interface GraphAnalysisResponse {
   nodeCount: number;
   edgeCount: number;
   weighted: boolean;
-  graphType: 'Mixed' | 'Directed' | 'Undirected';
+  graphType: 'Mixed' | 'Directed' | 'Undirected' | string; // Ajuste para permitir o valor traduzido
   message: string;
   nodeDetails: NodeDetail[];
+  connected: boolean; // Corrigido para corresponder à resposta da API
 }
 
 
@@ -121,7 +122,11 @@ async function handleProcessGraph() {
     const portugueseMessage = `Grafo processado com sucesso. É um grafo do tipo ${translatedGraphType} com ${analysisData.nodeCount} nós e ${analysisData.edgeCount} arestas.`;
 
     // Atualiza o resultado da análise com a mensagem traduzida
-    analysisResult.value = { ...analysisData, message: portugueseMessage };
+    analysisResult.value = { 
+      ...analysisData, 
+      message: portugueseMessage,
+      graphType: translatedGraphType // Armazena o tipo traduzido para uso no template. O tipo foi ajustado na interface.
+    };
     isDialogVisible.value = true; // Abre o modal com os resultados
 
     // Usa a mensagem traduzida no toast
@@ -161,10 +166,13 @@ async function handleProcessGraph() {
       <div v-if="analysisResult">
         <p>{{ analysisResult.message }}</p>
         <ul class="summary-list">
-          <li><strong>Tipo de Grafo:</strong> {{ analysisResult.graphType }}</li>
+          <li><strong>Tipo de Grafo:</strong> {{ analysisResult.graphType }}</li> 
           <li><strong>Nós:</strong> {{ analysisResult.nodeCount }}</li>
           <li><strong>Arestas:</strong> {{ analysisResult.edgeCount }}</li>
           <li><strong>Ponderado:</strong> {{ analysisResult.weighted ? 'Sim' : 'Não' }}</li>
+          <li v-tooltip.top="'Indica se todos os nós são alcançáveis, ignorando a direção das arestas (Conectividade Fraca).'">
+            <strong>Conectado:</strong> {{ analysisResult.connected ? 'Sim' : 'Não' }}
+          </li>
         </ul>
         <DataTable :value="analysisResult.nodeDetails" responsiveLayout="scroll">
           <Column field="id" header="Nó"></Column>
