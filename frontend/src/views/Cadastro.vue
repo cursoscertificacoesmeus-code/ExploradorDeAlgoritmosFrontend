@@ -9,8 +9,8 @@
         <p>Crie sua conta para salvar e gerenciar seus grafos e análises.</p>
         <div class="p-fluid">
           <div class="p-field">
-            <label for="name">Nome</label>
-            <InputText id="name" v-model="name" type="text" />
+            <label for="username">Nome de Usuário</label>
+            <InputText id="username" v-model="username" type="text" />
           </div>
           <div class="p-field">
             <label for="email">Email</label>
@@ -32,21 +32,33 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import Button from 'primevue/button';
+import { register as registerUser } from '../services/authService';
 
-const name = ref('');
+const router = useRouter();
+const username = ref('');
 const email = ref('');
 const password = ref('');
 
-const register = () => {
-  // TODO: Implementar a lógica de cadastro
-  console.log('Dados de cadastro:', { name: name.value, email: email.value });
-  alert('Funcionalidade de cadastro ainda não implementada.');
+const register = async () => {
+  if (!username.value || !email.value || !password.value) {
+    alert('Por favor, preencha todos os campos.');
+    return;
+  }
+  try {
+    await registerUser({ username: username.value, email: email.value, password: password.value });
+    alert('Cadastro realizado com sucesso! Você será redirecionado para a página de login.');
+    router.push('/'); // Redireciona para o login após o sucesso
+  } catch (error: any) {
+    // Idealmente, usar um componente de Toast/Notification aqui
+    alert(`Erro no cadastro: ${error.response?.data?.message || 'Verifique os dados e tente novamente.'}`);
+  }
 };
 </script>
 

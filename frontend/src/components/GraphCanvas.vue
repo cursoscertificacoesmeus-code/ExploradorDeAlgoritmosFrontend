@@ -2,31 +2,55 @@
   <div class="graph-canvas-wrapper">
     <div ref="cyContainer" class="graph-canvas-container"></div>
     <transition name="fade" mode="out-in">
-      <div v-if="showEmptyMessage" :key="currentMessageIndex" class="empty-message-overlay">
+      <!-- Adicionado v-if="currentMessage" para garantir que o objeto não seja undefined -->
+      <div v-if="showEmptyMessage && currentMessage" :key="currentMessageIndex" class="empty-message-overlay">
         <div class="message-content">
           <h3>{{ currentMessage.title }}</h3>
-          <p v-for="(paragraph, index) in currentMessage.paragraphs" :key="index" v-html="paragraph"></p>
+          <p v-for="(paragraph, index) in currentMessage.paragraphs" :key="index" v-html="paragraph" />
         </div>
       </div>
     </transition>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch, computed } from 'vue';
 import cytoscape from 'cytoscape';
+import type { Core, EdgeSingular, NodeSingular, StylesheetStyle, ElementDefinition, CoseLayoutOptions } from 'cytoscape';
 import { useGraphStore } from '../stores/graphStore';
 
-const cyContainer = ref(null);
-let cy = null;
-const showEmptyMessage = ref(true);
-const currentMessageIndex = ref(0);
-let messageInterval = null;
+interface NodeData {
+  id: string;
+}
+
+interface EdgeData {
+  source: string;
+  target: string;
+  weight?: number | null;
+  directed?: boolean;
+}
+
+interface GraphData {
+  nodes: NodeData[];
+  edges: EdgeData[];
+}
+
+interface RandomNodeData {
+  min: number;
+  max: number;
+  count: number;
+}
+
+const cyContainer = ref<HTMLDivElement | null>(null);
+let cy: Core | null = null;
+const showEmptyMessage = ref<boolean>(true);
+const currentMessageIndex = ref<number>(0);
+let messageInterval: number | null = null;
 
 const graphStore = useGraphStore();
 
 // Estilo estático para os nós
-const nodeStyle = {
+const nodeStyle: StylesheetStyle = {
   selector: 'node',
   style: {
     'background-color': 'hsla(160, 100%, 37%, 1)',
@@ -40,7 +64,7 @@ const nodeStyle = {
 };
 
 // Função para obter os estilos dinâmicos das arestas
-const getDynamicEdgeStyles = () => {
+const getDynamicEdgeStyles = (): StylesheetStyle[] => {
   return [
     {
       selector: 'edge',
@@ -50,7 +74,7 @@ const getDynamicEdgeStyles = () => {
         'arrow-scale': 0.5,
         'curve-style': 'bezier',
         'target-arrow-color': '#ccc',
-        'target-arrow-shape': (ele) => {
+        'target-arrow-shape': (ele: EdgeSingular) => {
           // Se for misto, a direção vem do dado da aresta.
           // Senão, usa a configuração global.
           if (graphStore.isMixed) {
@@ -68,7 +92,6 @@ const getDynamicEdgeStyles = () => {
         'text-background-padding': '2px',
         'text-border-width': 1,
         'text-border-color': '#ccc',
-        'text-border-radius': 3
       }
     }
   ];
@@ -102,21 +125,21 @@ onMounted(() => {
     cy = cytoscape({
       container: cyContainer.value,
       elements: [],
-      style: [
+      style: [ // O tipo de 'style' aceita um array de Stylesheet
         nodeStyle, // Estilo estático dos nós
         ...getDynamicEdgeStyles() // Estilo dinâmico inicial das arestas
       ],
-      layout: {
+      layout: { // Corrigido para usar opções de layout válidas
         name: 'cose',
-        idealNodeSpacing: 100,
+        nodeRepulsion: () => 400000,
         nodeOverlap: 20,
         fit: true,
         padding: 30
-      }
+      } as CoseLayoutOptions
     });
 
     cy.on('add remove', 'node, edge', () => {
-      showEmptyMessage.value = cy.elements().empty();
+      showEmptyMessage.value = cy?.elements().empty() ?? true;
     });
 
     startMessageCarousel();
@@ -129,7 +152,7 @@ onUnmounted(() => {
 
 function startMessageCarousel() {
   stopMessageCarousel(); // Garante que não haja múltiplos intervalos
-  messageInterval = setInterval(() => {
+  messageInterval = window.setInterval(() => {
     currentMessageIndex.value = (currentMessageIndex.value + 1) % messages.length;
   }, 5000); // Muda a cada 5 segundos
 }
@@ -155,7 +178,7 @@ watch([() => graphStore.isDirected, () => graphStore.isMixed],
     if (!cy) return;
 
     // Redefine o estilo da seta para todas as arestas com base no modo atual
-    cy.edges().style('target-arrow-shape', (ele) => {
+    cy.edges().style('target-arrow-shape', (ele: EdgeSingular) => {
       if (graphStore.isMixed) {
         return ele.data('directed') ? 'triangle' : 'none';
       } else {
@@ -167,7 +190,7 @@ watch([() => graphStore.isDirected, () => graphStore.isMixed],
 
 watch(
   () => graphStore.isWeighted,
-  (newIsWeighted) => {
+  (newIsWeighted: boolean) => {
     if (cy) {
       cy.style().selector('edge').style('label', newIsWeighted ? 'data(weight)' : '').style('text-margin-y', newIsWeighted ? -10 : 0).update();
     }
@@ -175,17 +198,17 @@ watch(
 );
 
 // Função que gera um grafo a partir de uma lista de nós
-function generateGraphFromData(nodes) {
+function generateGraphFromData(nodes: string[]) {
   if (!cy) return;
   cy.elements().remove();
-  const newElements = nodes.map(nodeId => ({ group: 'nodes', data: { id: nodeId } }));
+  const newElements: ElementDefinition[] = nodes.map(nodeId => ({ group: 'nodes', data: { id: nodeId } }));
   cy.add(newElements);
-  cy.layout({ name: 'cose', fit: true, padding: 50 }).run();
+  cy.layout({ name: 'cose', fit: true, padding: 50 } as CoseLayoutOptions).run();
   showEmptyMessage.value = cy.elements().empty();
 }
 
 // Função que adiciona um novo nó manualmente
-function addNewNode(nodeId) {
+function addNewNode(nodeId: string) {
   if (!cy) return;
 
   if (!cy.getElementById(nodeId).empty()) {
@@ -197,19 +220,19 @@ function addNewNode(nodeId) {
     group: 'nodes',
     data: { id: nodeId }
   });
-  cy.layout({ name: 'cose', fit: false }).run();
+  cy.layout({ name: 'cose', fit: false } as CoseLayoutOptions).run();
   showEmptyMessage.value = cy.elements().empty();
 }
 
 // Função que adiciona uma nova aresta
-function addNewEdge({ source, target, weight = null, directed = true }) {
+function addNewEdge({ source, target, weight = null, directed = true }: EdgeData) {
   if (!cy) return;
   if (cy.getElementById(source).empty() || cy.getElementById(target).empty()) {
     alert(`Erro: Nó de origem ou destino não encontrado.`);
     return;
   }
 
-  const edgeData = {
+  const edgeData: { id: string; source: string; target: string; weight?: number | null; directed?: boolean } = {
     id: `${source}-${target}-${Math.random()}`,
     source: source,
     target: target,
@@ -229,7 +252,7 @@ function addNewEdge({ source, target, weight = null, directed = true }) {
 }
 
 // Função para remover um nó específico
-function removeNode(nodeId) {
+function removeNode(nodeId: string) {
   if (!cy) return;
   const node = cy.getElementById(nodeId);
   if (node.empty()) {
@@ -240,7 +263,7 @@ function removeNode(nodeId) {
 }
 
 // Função para remover uma aresta específica
-function removeEdge({ source, target }) {
+function removeEdge({ source, target }: { source: string; target: string }) {
   if (!cy) return;
   const edge = cy.edges(`[source = "${source}"][target = "${target}"]`);
   if (edge.empty()) {
@@ -251,20 +274,20 @@ function removeEdge({ source, target }) {
 }
 
 // Nova função para gerar nós aleatórios dentro de uma faixa
-function generateRandomNodes({ min, max, count }) {
+function generateRandomNodes({ min, max, count }: RandomNodeData) {
   if (!cy) return;
 
   cy.elements().remove();
 
   const generatedNodes = new Set();
-  while (generatedNodes.size < count) {
+  while (generatedNodes.size < count && generatedNodes.size < (max - min + 1)) {
     const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
     generatedNodes.add(randomNumber.toString());
   }
 
-  const newElements = Array.from(generatedNodes).map(nodeId => ({
+  const newElements: ElementDefinition[] = Array.from(generatedNodes).map(nodeId => ({
     group: 'nodes',
-    data: { id: nodeId }
+    data: { id: String(nodeId) }
   }));
 
   cy.add(newElements);
@@ -273,14 +296,14 @@ function generateRandomNodes({ min, max, count }) {
 }
 
 // Nova função para exportar os dados do grafo
-function getGraphData() {
+function getGraphData(): GraphData {
   if (!cy) return { nodes: [], edges: [] };
 
-  const nodes = cy.nodes().map(node => ({ id: node.id() }));
-  const edges = cy.edges().map(edge => ({
+  const nodes: NodeData[] = cy.nodes().map((node: NodeSingular) => ({ id: node.id() }));
+  const edges: EdgeData[] = cy.edges().map((edge: EdgeSingular) => ({
     source: edge.source().id(),
     target: edge.target().id(),
-    weight: edge.data('weight'),
+    weight: edge.data('weight') || null,
     directed: edge.data('directed')
   }));
 
