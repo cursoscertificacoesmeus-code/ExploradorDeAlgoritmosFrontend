@@ -35,21 +35,31 @@ import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import Button from 'primevue/button';
 import { useAuthStore } from '../stores/authStore';
+import { useToast } from 'primevue/usetoast';
 
 const authStore = useAuthStore();
+const toast = useToast();
 const username = ref('');
 const password = ref('');
 
 const login = async () => {
   if (!username.value || !password.value) {
-    alert('Por favor, preencha o nome de usuário e a senha.');
+    toast.add({ 
+      severity: 'warn', 
+      summary: 'Atenção', 
+      detail: 'Por favor, preencha o nome de usuário e a senha.', 
+      life: 3000 
+    });
     return;
   }
   try {
     await authStore.login({ username: username.value, password: password.value });
   } catch (error: any) {
-    // Idealmente, usar um componente de Toast/Notification aqui
-    alert('Falha no login: Verifique seu nome de usuário e senha.');
+    toast.add({ 
+      severity: 'error', 
+      summary: 'Falha no Login', 
+      detail: 'Verifique seu nome de usuário e senha.', 
+      life: 4000 });
   }
 };
 </script>

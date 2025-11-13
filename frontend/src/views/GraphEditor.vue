@@ -3,24 +3,10 @@ import { ref } from 'vue';
 import ControlPanel from '../components/ControlPanel.vue'
 import GraphCanvas from '../components/GraphCanvas.vue'
 import { useGraphStore } from '../stores/graphStore';
-import api from '../services/api'; // 1. Substituir axios pela nossa instância 'api'
+import api from '../services/api'; // 1. Usar a instância centralizada do 'api'
+import { useToast } from 'primevue/usetoast';
 
-// 1. Definir uma interface para os métodos expostos por GraphCanvas
-interface GraphCanvasInstance {
-  addNewNode: (nodeId: string) => void;
-  addNewEdge: (edgeData: EdgeData) => void;
-  generateGraphFromData: (nodes: string[]) => void;
-  removeNode: (nodeId: string) => void;
-  removeEdge: (edgeData: { source: string; target: string }) => void;
-  generateRandomNodes: (data: RandomNodeData) => void;
-  getGraphData: () => { nodes: { id: string }[]; edges: EdgeData[] };
-}
-
-// 2. Tipar a ref com a interface que criamos
-const graphCanvasRef = ref<GraphCanvasInstance | null>(null);
-
-const graphStore = useGraphStore(); // A store já é tipada
-
+// 1. Definir os tipos para os dados dos eventos, espelhando o que é emitido pelo ControlPanel
 interface EdgeData {
   source: string;
   target: string;
@@ -33,6 +19,21 @@ interface RandomNodeData {
   max: number;
   count: number;
 }
+
+// 1. Adicionar uma interface para a nova resposta da API
+interface GraphAnalysisResponse {
+  nodeCount: number;
+  edgeCount: number;
+  weighted: boolean;
+  graphType: 'Mixed' | 'Directed' | 'Undirected';
+  message: string;
+}
+
+
+// 2. Tipar a referência para que o TypeScript saiba quais métodos estão disponíveis
+const graphCanvasRef = ref<InstanceType<typeof GraphCanvas> | null>(null);
+const graphStore = useGraphStore();
+const toast = useToast();
 
 function handleAddNode(nodeId: string) {
   if (graphCanvasRef.value) {
@@ -71,12 +72,11 @@ function handleGenerateRandomNodes(data: RandomNodeData) {
 }
 
 async function handleProcessGraph() {
-  if (!graphCanvasRef.value) return;
+  if (!graphCanvasRef.value) return; // A verificação de nulo continua sendo uma boa prática
 
   const { nodes, edges } = graphCanvasRef.value.getGraphData();
 
   const graphData = {
-    // Os tipos aqui são inferidos a partir do retorno de getGraphData()
     nodes,
     edges,
     directed: graphStore.isDirected,
@@ -85,13 +85,22 @@ async function handleProcessGraph() {
   };
 
   try {
-    // 2. Usar a instância 'api'. A baseURL já está configurada nela.
-    const response = await api.post('/graph/process', graphData);
+    // 2. Chamar o endpoint usando a instância 'api'. A baseURL já está configurada.
+    const response = await api.post<GraphAnalysisResponse>('/graph/process', graphData);
     console.log('Resposta do Backend:', response.data);
-    alert('Grafo processado com sucesso pelo backend! Verifique o console do backend.');
-  } catch (error) {
+    toast.add({ 
+      severity: 'success', 
+      summary: 'Sucesso', 
+      detail: response.data.message || 'Grafo processado com sucesso!', 
+      life: 4000 
+    });
+  } catch (error: any) {
     console.error('Erro ao enviar o grafo para o backend:', error);
-    alert('Ocorreu um erro ao se comunicar com o backend. Verifique se ele está rodando e o console do navegador para mais detalhes.');
+    toast.add({ 
+      severity: 'error', 
+      summary: 'Erro de Comunicação', 
+      detail: error.response?.data?.message || 'Não foi possível se comunicar com o backend.', 
+      life: 5000 });
   }
 }
 </script>

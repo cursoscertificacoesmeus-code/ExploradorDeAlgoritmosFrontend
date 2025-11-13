@@ -1,4 +1,5 @@
 <template>
+  <Toast />
   <router-view />
 </template>
 
@@ -6,6 +7,7 @@
 import { onMounted } from 'vue';
 import { useAuthStore } from './stores/authStore';
 
+import Toast from 'primevue/toast';
 const authStore = useAuthStore();
 
 // Tenta buscar o usuário se um cookie de sessão existir ao carregar a página
